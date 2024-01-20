@@ -19,10 +19,10 @@ export default function App (): JSX.Element {
 
       </div>
       <div>
-        <a href='/?p=q'>Next Profit Quota Calculator</a>
+        <a href='/the-great-asset/?p=q'>Next Profit Quota Calculator</a>
       </div>
       <div>
-        <a href='/?p=o'>Overtime Bonus Calculator</a>
+        <a href='/the-great-asset/?p=o'>Overtime Bonus Calculator</a>
       </div>
     </div>
   )
