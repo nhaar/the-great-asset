@@ -11,9 +11,19 @@ export default function App (): JSX.Element {
   } else if (page === 'o') {
     return <OvertimeCalculator />
   }
+
   return (
     <div>
-      Hello Company!
+      <div>
+        Welcome to The Great Asset.
+
+      </div>
+      <div>
+        <a href='/?p=q'>Next Profit Quota Calculator</a>
+      </div>
+      <div>
+        <a href='/?p=o'>Overtime Bonus Calculator</a>
+      </div>
     </div>
   )
 }
