@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/the-great-asset/static/js/main.c2ed4bca.js",
+    "main.js": "/the-great-asset/static/js/main.a0734500.js",
     "index.html": "/the-great-asset/index.html",
-    "main.c2ed4bca.js.map": "/the-great-asset/static/js/main.c2ed4bca.js.map"
+    "main.a0734500.js.map": "/the-great-asset/static/js/main.a0734500.js.map"
   },
   "entrypoints": [
-    "static/js/main.c2ed4bca.js"
+    "static/js/main.a0734500.js"
   ]
 }
