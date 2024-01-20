@@ -2,11 +2,10 @@ import React from 'react'
 import QuotaCalculator from './QuotaCalculator'
 
 export default function App (): JSX.Element {
-  const match: RegExpMatchArray = window.location.pathname.match(/\/the-great-asset\/(.*)/) as RegExpMatchArray
-  
+  const urlParams = new URLSearchParams(window.location.search)
+  const page = urlParams.get('p')
 
-  const path: string = match[1]
-  if (path == 'quota') {
+  if (page == 'q') {
     return <QuotaCalculator />
   }
   return (
