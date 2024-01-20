@@ -5,7 +5,7 @@ export default function App (): JSX.Element {
   const urlParams = new URLSearchParams(window.location.search)
   const page = urlParams.get('p')
 
-  if (page == 'q') {
+  if (page === 'q') {
     return <QuotaCalculator />
   }
   return (
