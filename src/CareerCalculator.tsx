@@ -211,18 +211,18 @@ export default function CareerCalculator (): JSX.Element {
     if (runData.timeData.length === 0) {
       addQuota(130)
     }
-    console.log(runData.timeData)
-    if (runData.timeData[runData.timeData.length - 1].scrapSold <= 0) {
+    const currentTimeData: TimeData = runData.timeData[runData.timeData.length - 1]
+    if (currentTimeData.scrapSold <= 0) {
       setNextQuotaDiv((
         <div>
           Waiting to sell scrap...
         </div>
       ))
-    } else if (getShipTotal() > 0) {
+    } else if (getShipTotal() >= 0 && currentTimeData.scrapSold >= currentTimeData.currentQuota) {
       setNextQuotaDiv((
         <div>
           <div>
-            You have enough to meet the next profit quota!
+            You have met the next profit quota!
           </div>
           <button onClick={clickAddQuotaButton}>
             CLICK TO ADD NEW QUOTA
