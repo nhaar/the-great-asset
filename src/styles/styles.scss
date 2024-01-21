@@ -1,0 +1,12 @@
+@charset "utf-8";
+
+$body-background-color: #7c1a1b;
+$box-background-color: #8c301f;
+$primary: #fd9345;
+
+$input-related-color: #fb9444;
+$input-background-color: $input-related-color;
+$input-border-color: $input-related-color;
+$input-color: #000000;
+
+@import "~bulma/bulma";

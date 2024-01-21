@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import InputBox from './InputBox'
 
 export default function OvertimeCalculator (): JSX.Element {
   const [currentMoney, setCurrentMoney] = useState<string>('0')
@@ -28,35 +29,17 @@ export default function OvertimeCalculator (): JSX.Element {
 
   return (
     <div>
-      <div>
+      <h2 className='has-text-centered has-text-primary m-6'>
         This calculator will calculate the total value of scrap that you need to sell in order to have the desired amount of money after receiving the overtime bonus.
-      </div>
-      <div>
+      </h2>
+      <InputBox label='The amount of money that you already have' value={currentMoney} onChange={updateCurrentMoney} />
+      <InputBox label='Current profit quota to meet' value={currentQuota.toString()} onChange={updateCurrentQuota} />
+      <InputBox label='Desired value to have after receiving the overtime bonus' value={desiredValueToReach.toString()} onChange={updateDesiredValueToReach} />
+      <InputBox label='Days remaining (as it says in the ship, that is 0 if it is the last day)' value={daysRemaining} onChange={updateDaysRemaining} />
+      <div className='box m-6 is-flex is-flex-direction-column is-justify-content-center has-text-centered has-text-primary'>
         <div>
-          The amount of money that you already have
+          The value of scrap that you need to sell is {getAmountToSell()}.
         </div>
-        <input onChange={updateCurrentMoney} type='number' value={currentMoney} />
-      </div>
-      <div>
-        <div>
-          Current profit quota to meet
-        </div>
-        <input onChange={updateCurrentQuota} type='number' value={currentQuota} />
-      </div>
-      <div>
-        <div>
-          Desired value to have after receiving the overtime bonus
-        </div>
-        <input onChange={updateDesiredValueToReach} type='number' value={desiredValueToReach} />
-      </div>
-      <div>
-        <div>
-          Days remaining (as it says in the ship, that is 0 if it is the last day)
-        </div>
-        <input onChange={updateDaysRemaining} type='number' value={daysRemaining} />
-      </div>
-      <div>
-        The value of scrap that you need to sell is {getAmountToSell()}.
       </div>
     </div>
   )
