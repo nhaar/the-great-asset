@@ -314,11 +314,13 @@ export default function CareerCalculator (): JSX.Element {
     if (runData.timeData.length === 0) {
       return { timesFulfilled: 0, finalQuota: 130 }
     }
-    let previousQuota: number = 0
+    let previousQuota: number = 130
     let currentQuota: number = runData.timeData[runData.timeData.length - 1].currentQuota
     let timesFulfilled: number = runData.timeData.length - 1
     let scrapValue = getShipTotal() + getNumberOfUndoneDays() * avgLootPerDay
+    let hadAnyIncrease:boolean = false
     while (scrapValue >= currentQuota) {
+      hadAnyIncrease = true
       scrapValue += 3 * avgLootPerDay
       scrapValue -= currentQuota
       previousQuota = currentQuota
@@ -326,7 +328,14 @@ export default function CareerCalculator (): JSX.Element {
       timesFulfilled++
     }
 
-    const finalQuota = getNewProfitQuota(randomValueAtEnd, timesFulfilled - 1, previousQuota)
+    // if the next quota is already impossible, `hadAnyIncrease` should be false and we
+    // don't need to calculate anything
+    let finalQuota: number = 0
+    if (hadAnyIncrease) {
+      finalQuota = getNewProfitQuota(randomValueAtEnd, timesFulfilled - 1, previousQuota)
+    } else {
+      finalQuota = currentQuota
+    }
     return { timesFulfilled, finalQuota }
   }
 
@@ -335,7 +344,7 @@ export default function CareerCalculator (): JSX.Element {
     return (
       <div>
         <div>
-          {randomMessage}, you will be able to get to quota {timesFulfilled}, and your final quota will be {finalQuota}.
+          {randomMessage}, you will be able to get to quota {timesFulfilled + 1}, and your final quota will be {finalQuota}.
         </div>
       </div>
     )
@@ -343,7 +352,7 @@ export default function CareerCalculator (): JSX.Element {
 
   return (
     <div className='has-text-primary mx-6'>
-      <h2 className='ml-3 has-text-centered'>
+      <h2 className='ml-3 mb-6 has-text-centered'>
         Career Calculator
       </h2>
       <div style={{
