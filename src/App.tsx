@@ -36,7 +36,7 @@ export default function App (): JSX.Element {
         </div>
       </header>
       <h2 className='has-text-primary has-text-centered'>
-        A small collection of resources for Lethal Company
+        A small collection of calculator resources for Lethal Company
       </h2>
       <ResourceLink page='q' title='Next Profit Quota Calculator' desc='Calculate what the next profit quota may be.' />
       <ResourceLink page='o' title='Overtime Bonus Calculator' desc='Calculate how much you need to sell to get a total amount of money accounting overtime bonus.' />
