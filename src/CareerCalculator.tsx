@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { isValidNumberInput } from './utils'
+import { getNewProfitQuota, isValidNumberInput } from './utils'
 
 interface RunData {
   timeData: TimeData[]
@@ -257,6 +257,25 @@ export default function CareerCalculator (): JSX.Element {
     setRunData(newRunData)
   }
 
+  function getNumberOfUndoneDays (): number {
+    let days: number = 0
+    const totalQuotas = runData.timeData.length
+    if (totalQuotas === 0) {
+      return 0
+    }
+    console.log(totalQuotas)
+    const lastQuota = runData.timeData[totalQuotas - 1]
+
+    for (let i = 2; i >= 0; i--) {
+      if (lastQuota.days[i].acquired > 0) {
+        break
+      }
+      days++
+    }
+
+    return days
+  }
+
   function getAverageLootPerDay (): number {
     let total: number = 0
     let days: number = 0
@@ -268,15 +287,44 @@ export default function CareerCalculator (): JSX.Element {
     }
 
     // correction to ignore days that haven't been done yet
-    const totalQuotas = runData.timeData.length
-    const lastQuota = runData.timeData[totalQuotas - 1]
-    for (let i = 2; i >= 0; i--) {
-      if (lastQuota.days[i].acquired > 0) {
-        break
-      }
-      days--
+    days -= getNumberOfUndoneDays()
+    if (days === 0) {
+      return 0
     }
     return (total + runData.shipCorrection) / days
+  }
+
+  const avgLootPerDay = getAverageLootPerDay()
+
+  function getHowManyQuotasCanBeDone (randomValueThroughout: number, randomValueAtEnd: number): { timesFulfilled: number, finalQuota: number } {
+    if (runData.timeData.length === 0) {
+      return { timesFulfilled: 0, finalQuota: 130 }
+    }
+    let previousQuota: number = 0
+    let currentQuota: number = runData.timeData[runData.timeData.length - 1].currentQuota
+    let timesFulfilled: number = runData.timeData.length - 1
+    let scrapValue = getShipTotal() + getNumberOfUndoneDays() * avgLootPerDay
+    while (scrapValue >= currentQuota) {
+      scrapValue += 3 * avgLootPerDay
+      scrapValue -= currentQuota
+      previousQuota = currentQuota
+      currentQuota = getNewProfitQuota(randomValueThroughout, timesFulfilled, currentQuota)
+      timesFulfilled++
+    }
+
+    const finalQuota = getNewProfitQuota(randomValueAtEnd, timesFulfilled - 1, previousQuota)
+    return { timesFulfilled, finalQuota }
+  }
+
+  function FinalQuotaStat ({ randomValueThroughout, randomValueAtEnd, randomMessage }: { randomValueThroughout: number, randomValueAtEnd: number, randomMessage: string }): JSX.Element {
+    const { timesFulfilled, finalQuota } = getHowManyQuotasCanBeDone(randomValueThroughout, randomValueAtEnd)
+    return (
+      <div>
+        <div>
+          {randomMessage}, you will be able to get to quota {timesFulfilled}, and your final quota will be {finalQuota}.
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -303,11 +351,23 @@ export default function CareerCalculator (): JSX.Element {
       </div>
       <div>
         <div>
-          Total average loot per day: {getAverageLootPerDay()}
+          Total average loot per day: {avgLootPerDay}
         </div>
         <div>
           This value ignores days that haven't been done yet in the current quota.
         </div>
+      </div>
+      <div>
+        <div>
+          At the current pace, you will be able to:
+        </div>
+        <FinalQuotaStat randomMessage='In the worst possible RNG' randomValueThroughout={0.5} randomValueAtEnd={-0.5} />
+        <FinalQuotaStat randomMessage='In the average RNG' randomValueThroughout={0} randomValueAtEnd={0} />
+        <FinalQuotaStat randomMessage='In the best possible RNG' randomValueThroughout={-0.5} randomValueAtEnd={0.5} />
+        <div>
+          This pace will be specially inaccurate if you are in the first few quotas (before enough paid moon averages are accounted and before the quota exceeds the price to go to the paid moon)
+        </div>
+
       </div>
     </div>
   )

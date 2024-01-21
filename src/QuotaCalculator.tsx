@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { getNewProfitQuota } from './utils'
 
 export default function QuotaCalculator (): JSX.Element {
   const [timesFulfilled, setTimesFulfilled] = useState<string>('0')
@@ -13,10 +14,8 @@ export default function QuotaCalculator (): JSX.Element {
     setPreviousQuota(Number(event.target.value))
   }
 
-  function getNewProfitQuota (randomValue: number): number {
-    // the result is truncated in the end in-game
-    const times: number = Number(timesFulfilled)
-    return Math.floor(previousQuota + 100 * (1 + Math.pow(times, 2) / 16) * (randomValue + 1))
+  function getNewProfitQuotaInCalculator (randomValue: number): number {
+    return getNewProfitQuota(randomValue, Number(timesFulfilled), previousQuota)
   }
 
   return (
@@ -37,13 +36,13 @@ export default function QuotaCalculator (): JSX.Element {
         <input onChange={updateTimesFulfilled} type='number' value={timesFulfilled} />
       </div>
       <div>
-        The smallest possible new profit quota is {getNewProfitQuota(-0.5)}.
+        The smallest possible new profit quota is {getNewProfitQuotaInCalculator(-0.5)}.
       </div>
       <div>
-        The average possible new profit quota is {getNewProfitQuota(0)}.
+        The average possible new profit quota is {getNewProfitQuotaInCalculator(0)}.
       </div>
       <div>
-        The biggest possible new profit quota is {getNewProfitQuota(0.5)}.
+        The biggest possible new profit quota is {getNewProfitQuotaInCalculator(0.5)}.
       </div>
     </div>
   )
