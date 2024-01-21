@@ -34,9 +34,9 @@ function isTimeData (obj: any): obj is TimeData {
   }
   if (obj.days === undefined) {
     return false
-  } else if (!Array.isArray(obj.quotas)) {
+  } else if (!Array.isArray(obj.days)) {
     return false
-  } else if (obj.quotas.every(isDaysData) === false) {
+  } else if (obj.days.every(isDaysData) === false) {
     return false
   }
   if (obj.scrapSold === undefined) {
@@ -72,7 +72,7 @@ function isRunData (obj: any): obj is RunData {
 }
 
 function QuotaTime ({ data, quotaNumber, setterFn }: { data: TimeData, quotaNumber: number, setterFn: (prev: any) => any }): JSX.Element {
-  const [acquiredValues, setAcquiredValues] = useState<string[]>(['0', '0', '0'])
+  const [acquiredValues, setAcquiredValues] = useState<string[]>(data.days.map((dayData) => String(dayData.acquired)))
   const [profitQuota, setProfitQuota] = useState<string>(String(data.currentQuota))
   const [scrapSold, setScrapSold] = useState<string>(String(data.scrapSold))
 
@@ -254,6 +254,8 @@ export default function CareerCalculator (): JSX.Element {
           </div>
         </div>))
     }
+
+    saveRunData()
   }, [runData])
 
   function saveRunData (): void {
@@ -277,7 +279,6 @@ export default function CareerCalculator (): JSX.Element {
     if (totalQuotas === 0) {
       return 0
     }
-    console.log(totalQuotas)
     const lastQuota = runData.timeData[totalQuotas - 1]
 
     for (let i = 2; i >= 0; i--) {
@@ -318,7 +319,7 @@ export default function CareerCalculator (): JSX.Element {
     let currentQuota: number = runData.timeData[runData.timeData.length - 1].currentQuota
     let timesFulfilled: number = runData.timeData.length - 1
     let scrapValue = getShipTotal() + getNumberOfUndoneDays() * avgLootPerDay
-    let hadAnyIncrease:boolean = false
+    let hadAnyIncrease: boolean = false
     while (scrapValue >= currentQuota) {
       hadAnyIncrease = true
       scrapValue += 3 * avgLootPerDay
@@ -350,8 +351,15 @@ export default function CareerCalculator (): JSX.Element {
     )
   }
 
+  function clickResetButton (): void {
+    if (window.confirm('Are you sure you want to reset?')) {
+      localStorage.removeItem('the-great-asset')
+      window.location.reload()
+    }
+  }
+
   return (
-    <div className='has-text-primary mx-6'>
+    <div className='has-text-primary mx-6 mb-6'>
       <h2 className='ml-3 mb-6 has-text-centered'>
         Career Calculator
       </h2>
@@ -361,6 +369,12 @@ export default function CareerCalculator (): JSX.Element {
       }}
       >
         <div className='is-flex is-flex-direction-column'>
+          <button
+            className='button mb-5' onClick={clickResetButton} style={{
+              width: '60%'
+            }}
+          >NEW RUN
+          </button>
           <div>
             {runData.timeData.map((timeData, index) => {
               return <QuotaTime key={index} data={timeData} quotaNumber={index + 1} setterFn={setRunData} />
@@ -376,7 +390,7 @@ export default function CareerCalculator (): JSX.Element {
             <div>
               Ship total not right? Click the button to fix it.
             </div>
-            <button onClick={fixShipTotal}>
+            <button className='button' onClick={fixShipTotal}>
               FIX SHIP TOTAL
             </button>
           </div>
@@ -396,7 +410,7 @@ export default function CareerCalculator (): JSX.Element {
             <FinalQuotaStat randomMessage='* In the average RNG' randomValueThroughout={0} randomValueAtEnd={0} />
             <FinalQuotaStat randomMessage='* In the best possible RNG' randomValueThroughout={-0.5} randomValueAtEnd={0.5} />
             <div>
-              This pace will be specially inaccurate if you are in the first few quotas (before enough paid moon averages are accounted and before the quota exceeds the price to go to the paid moon)
+              This pace will be specially inaccurate if you are in the first few quotas depending on your strats (before enough paid moon averages are accounted and before the quota exceeds the price to go to the paid moon)
             </div>
           </div>
         </div>

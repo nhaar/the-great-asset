@@ -9,4 +9,8 @@ $input-background-color: $input-related-color;
 $input-border-color: $input-related-color;
 $input-color: #000000;
 
+$button-background-color: $input-related-color;
+$button-border-color: $input-related-color;
+$button-color: #000000;
+
 @import "~bulma/bulma";
