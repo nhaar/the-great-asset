@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { isValidNumberInput } from './utils'
 
 interface RunData {
   timeData: TimeData[]
@@ -197,6 +198,15 @@ export default function CareerCalculator (): JSX.Element {
     setRunData(newRunData)
   }
 
+  function clickAddQuotaButton (): void {
+    const newQuota: string | null = window.prompt('What is the new quota?')
+    if (!isValidNumberInput(newQuota)) {
+      window.alert('Invalid value')
+      return
+    }
+    addQuota(Number(newQuota))
+  }
+
   useEffect(() => {
     if (runData.timeData.length === 0) {
       addQuota(130)
@@ -211,7 +221,12 @@ export default function CareerCalculator (): JSX.Element {
     } else if (getShipTotal() > 0) {
       setNextQuotaDiv((
         <div>
-          You have enough to meet the next profit quota!
+          <div>
+            You have enough to meet the next profit quota!
+          </div>
+          <button onClick={clickAddQuotaButton}>
+            CLICK TO ADD NEW QUOTA
+          </button>
         </div>
       ))
     } else {
@@ -233,7 +248,7 @@ export default function CareerCalculator (): JSX.Element {
 
   function fixShipTotal (): void {
     const newTotal: string | null = window.prompt('What is the ship total?')
-    if (newTotal === null || newTotal.match(/^\d+$/) === null) {
+    if (!isValidNumberInput(newTotal)) {
       window.alert('Invalid value')
       return
     }
