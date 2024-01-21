@@ -257,6 +257,28 @@ export default function CareerCalculator (): JSX.Element {
     setRunData(newRunData)
   }
 
+  function getAverageLootPerDay (): number {
+    let total: number = 0
+    let days: number = 0
+    for (const timeData of runData.timeData) {
+      for (const dayData of timeData.days) {
+        total += dayData.acquired
+        days++
+      }
+    }
+
+    // correction to ignore days that haven't been done yet
+    const totalQuotas = runData.timeData.length
+    const lastQuota = runData.timeData[totalQuotas - 1]
+    for (let i = 2; i >= 0; i--) {
+      if (lastQuota.days[i].acquired > 0) {
+        break
+      }
+      days--
+    }
+    return (total + runData.shipCorrection) / days
+  }
+
   return (
     <div>
       <div>
@@ -278,6 +300,14 @@ export default function CareerCalculator (): JSX.Element {
         <button onClick={fixShipTotal}>
           FIX SHIP TOTAL
         </button>
+      </div>
+      <div>
+        <div>
+          Total average loot per day: {getAverageLootPerDay()}
+        </div>
+        <div>
+          This value ignores days that haven't been done yet in the current quota.
+        </div>
       </div>
     </div>
   )
