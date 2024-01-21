@@ -120,31 +120,45 @@ function QuotaTime ({ data, quotaNumber, setterFn }: { data: TimeData, quotaNumb
     setScrapSold(event.target.value)
   }
 
-  const days = [0, 1, 2].map((dayIndex) => {
-    const dayData = data.days[dayIndex]
-    return (
-      <div key={dayIndex}>
-        <div>{dayIndex + 1}</div>
-        <input type='text' value={acquiredValues[dayIndex]} onChange={getUpdateAcquiredValue(dayIndex)} />
-        <div>{dayData.acquired}</div>
-      </div>
-    )
-  })
+  const dayComponents = []
+
+  for (let i = 0; i < 3; i++) {
+    dayComponents.push((
+      <div key={String(i) + '1'}>{i + 1}</div>
+    ))
+    dayComponents.push((
+      <input className='input' key={String(i) + '2'} type='text' value={acquiredValues[i]} onChange={getUpdateAcquiredValue(i)} />
+    ))
+  }
 
   return (
-    <div>
+    <div
+      className='box has-text-primary is-flex is-flex-direction-column has-text-centered is-justify-content-center' style={{
+        width: '60%'
+      }}
+    >
       <div>
         QUOTA {quotaNumber}
       </div>
-      <input type='text' value={profitQuota} onChange={updateProfitQuota} />
-      <div>
+      <div className='is-flex is-justify-content-center'>
+        <input
+          type='text' value={profitQuota} onChange={updateProfitQuota} className='input' style={{
+            width: '100px'
+          }}
+        />
+      </div>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr'
+      }}
+      >
         <div>DAY</div>
         <div>ACQUIRED LOOT</div>
+        {dayComponents}
       </div>
-      {days}
       <div>
         <div>SCRAP SOLD</div>
-        <input type='text' value={scrapSold} onChange={updateScrapSold} />
+        <input className='input' type='text' value={scrapSold} onChange={updateScrapSold} />
       </div>
     </div>
   )
@@ -328,46 +342,55 @@ export default function CareerCalculator (): JSX.Element {
   }
 
   return (
-    <div>
-      <div>
-        {runData.timeData.map((timeData, index) => {
-          return <QuotaTime key={index} data={timeData} quotaNumber={index + 1} setterFn={setRunData} />
-        })}
-      </div>
-      {nextQuotaDiv}
-      <div>
-        <div>
-          SHIP TOTAL
+    <div className='has-text-primary mx-6'>
+      <h2 className='ml-3 has-text-centered'>
+        Career Calculator
+      </h2>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '40% 1fr'
+      }}
+      >
+        <div className='is-flex is-flex-direction-column'>
+          <div>
+            {runData.timeData.map((timeData, index) => {
+              return <QuotaTime key={index} data={timeData} quotaNumber={index + 1} setterFn={setRunData} />
+            })}
+          </div>
+          {nextQuotaDiv}
         </div>
-        <div>
-          {getShipTotal()}
+        <div className='is-flex is-flex-direction-column'>
+          <div className='mb-6'>
+            <div>
+              SHIP TOTAL: {getShipTotal()}
+            </div>
+            <div>
+              Ship total not right? Click the button to fix it.
+            </div>
+            <button onClick={fixShipTotal}>
+              FIX SHIP TOTAL
+            </button>
+          </div>
+          <div className='mb-6'>
+            <div>
+              Total average loot per day: {avgLootPerDay.toFixed(2)}
+            </div>
+            <div>
+              This value ignores days that haven't been done yet in the current quota.
+            </div>
+          </div>
+          <div>
+            <div>
+              At the current pace:
+            </div>
+            <FinalQuotaStat randomMessage='* In the worst possible RNG' randomValueThroughout={0.5} randomValueAtEnd={-0.5} />
+            <FinalQuotaStat randomMessage='* In the average RNG' randomValueThroughout={0} randomValueAtEnd={0} />
+            <FinalQuotaStat randomMessage='* In the best possible RNG' randomValueThroughout={-0.5} randomValueAtEnd={0.5} />
+            <div>
+              This pace will be specially inaccurate if you are in the first few quotas (before enough paid moon averages are accounted and before the quota exceeds the price to go to the paid moon)
+            </div>
+          </div>
         </div>
-        <div>
-          Ship total not right? Click the button to fix it.
-        </div>
-        <button onClick={fixShipTotal}>
-          FIX SHIP TOTAL
-        </button>
-      </div>
-      <div>
-        <div>
-          Total average loot per day: {avgLootPerDay}
-        </div>
-        <div>
-          This value ignores days that haven't been done yet in the current quota.
-        </div>
-      </div>
-      <div>
-        <div>
-          At the current pace, you will be able to:
-        </div>
-        <FinalQuotaStat randomMessage='In the worst possible RNG' randomValueThroughout={0.5} randomValueAtEnd={-0.5} />
-        <FinalQuotaStat randomMessage='In the average RNG' randomValueThroughout={0} randomValueAtEnd={0} />
-        <FinalQuotaStat randomMessage='In the best possible RNG' randomValueThroughout={-0.5} randomValueAtEnd={0.5} />
-        <div>
-          This pace will be specially inaccurate if you are in the first few quotas (before enough paid moon averages are accounted and before the quota exceeds the price to go to the paid moon)
-        </div>
-
       </div>
     </div>
   )
