@@ -1,6 +1,7 @@
 import React from 'react'
 import QuotaCalculator from './QuotaCalculator'
 import OvertimeCalculator from './OvertimeCalculator'
+import CareerCalculator from './CareerCalculator'
 
 export default function App (): JSX.Element {
   const urlParams = new URLSearchParams(window.location.search)
@@ -10,6 +11,8 @@ export default function App (): JSX.Element {
     return <QuotaCalculator />
   } else if (page === 'o') {
     return <OvertimeCalculator />
+  } else if (page === 'c') {
+    return <CareerCalculator />
   }
 
   return (
@@ -23,6 +26,9 @@ export default function App (): JSX.Element {
       </div>
       <div>
         <a href='/the-great-asset/?p=o'>Overtime Bonus Calculator</a>
+      </div>
+      <div>
+        <a href='/the-great-asset/?p=c'>Career Calculator</a>
       </div>
     </div>
   )
