@@ -466,11 +466,16 @@ export default function CareerCalculator (): JSX.Element {
   const [selectedRun, setSelectedRun] = useState<string>('')
 
   /** To store all the ways to access previously created runs */
-  const tabComponents = []
+  const tabComponents = [
+    <div className='mr-4 is-flex' style={{
+      alignItems: 'center',
+      justifyContent: 'center'
+    }} key={'0000'}>RUNS</div>
+  ]
   for (const run in localData) {
     tabComponents.push((
       <button
-        key={run} className='button' onClick={(): void => setSelectedRun(run)}
+        key={run} className='button mr-2' onClick={(): void => setSelectedRun(run)}
       >
         {run}
       </button>
@@ -515,14 +520,13 @@ export default function CareerCalculator (): JSX.Element {
       <h2 className='ml-3 mb-6 has-text-centered'>
         Career Calculator
       </h2>
-      <div>
-        <button onClick={addNewRun}>New Run</button>
-        <button onClick={deleteRun}>Delete Run</button>
+      <div className='mb-3'>
+        <button className='button mr-3' onClick={addNewRun}>New Run</button>
+        <button className='button' onClick={deleteRun}>Delete Run</button>
       </div>
-      <div>
-
+      <div className='is-flex is-flex-direction-row mb-2'>
+        {tabComponents}
       </div>
-      {tabComponents}
       {selectedRun === '' ? <div /> : <RunTracker key={selectedRun} name={selectedRun} localData={localData} setLocalData={setLocalData} />}
     </div>
   )
