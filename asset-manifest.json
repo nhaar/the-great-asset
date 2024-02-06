@@ -1,13 +1,18 @@
 {
   "files": {
-    "main.css": "/the-great-asset/static/css/main.d1c6fb5f.css",
-    "main.js": "/the-great-asset/static/js/main.1a1c6c46.js",
+    "main.css": "/the-great-asset/static/css/main.f12e72d7.css",
+    "main.js": "/the-great-asset/static/js/main.c3978971.js",
+    "static/media/3270-Regular.svg": "/the-great-asset/static/media/3270-Regular.35e0f0325ce678c2a7c8.svg",
+    "static/media/3270-Regular.eot": "/the-great-asset/static/media/3270-Regular.4eb813a146953ca77e0b.eot",
+    "static/media/3270-Regular.ttf": "/the-great-asset/static/media/3270-Regular.c5214072ddbceae866fb.ttf",
+    "static/media/3270-Regular.woff": "/the-great-asset/static/media/3270-Regular.3704563e57daa8017be0.woff",
+    "static/media/3270-Regular.woff2": "/the-great-asset/static/media/3270-Regular.ca3c9dcacffa9b1e7997.woff2",
     "index.html": "/the-great-asset/index.html",
-    "main.d1c6fb5f.css.map": "/the-great-asset/static/css/main.d1c6fb5f.css.map",
-    "main.1a1c6c46.js.map": "/the-great-asset/static/js/main.1a1c6c46.js.map"
+    "main.f12e72d7.css.map": "/the-great-asset/static/css/main.f12e72d7.css.map",
+    "main.c3978971.js.map": "/the-great-asset/static/js/main.c3978971.js.map"
   },
   "entrypoints": [
-    "static/css/main.d1c6fb5f.css",
-    "static/js/main.1a1c6c46.js"
+    "static/css/main.f12e72d7.css",
+    "static/js/main.c3978971.js"
   ]
 }
