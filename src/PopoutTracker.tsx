@@ -70,25 +70,31 @@ export default function PopoutTracker (): JSX.Element {
     return getRunAverageLootPerDay(runData)
   }
 
-  /** Get the worst possible quota number at current pace */
-  function getWorstPace (): number {
-    if (runData === null) return 0
+  function getPaceString (pace: { timesFulfilled: number, finalQuota: number }): string {
+    return `Q${pace.timesFulfilled} (${pace.finalQuota})`
+  }
 
-    return getHowManyQuotasCanBeDoneInRun(runData, 0.5, -0.5).timesFulfilled
+  const defaultPace = getPaceString({ timesFulfilled: 0, finalQuota: 0 })
+
+  /** Get the worst possible quota number at current pace */
+  function getWorstPace (): string {
+    if (runData === null) return defaultPace
+
+    return getPaceString(getHowManyQuotasCanBeDoneInRun(runData, 0.5, -0.5))
   }
 
   /** Get the average possible quota number at current pace */
-  function getAveragePace (): number {
-    if (runData === null) return 0
+  function getAveragePace (): string {
+    if (runData === null) return defaultPace
 
-    return getHowManyQuotasCanBeDoneInRun(runData, 0, 0).timesFulfilled
+    return getPaceString(getHowManyQuotasCanBeDoneInRun(runData, 0, 0))
   }
 
   /** Get the best possible quota number at current pace */
-  function getBestPace (): number {
-    if (runData === null) return 0
+  function getBestPace (): string {
+    if (runData === null) return defaultPace
 
-    return getHowManyQuotasCanBeDoneInRun(runData, -0.5, 0.5).timesFulfilled
+    return getPaceString(getHowManyQuotasCanBeDoneInRun(runData, -0.5, 0.5))
   }
 
   /** Style used to fix line spacing */
@@ -140,13 +146,13 @@ export default function PopoutTracker (): JSX.Element {
           Quota Pace:
         </div>
         <div style={marginStyle}>
-          &nbsp;&nbsp;Worst: Q{getWorstPace()}
+          &nbsp;&nbsp;Worst: {getWorstPace()}
         </div>
         <div style={marginStyle}>
-          &nbsp;&nbsp;Average: Q{getAveragePace()}
+          &nbsp;&nbsp;Average: {getAveragePace()}
         </div>
         <div style={marginStyle}>
-          &nbsp;&nbsp;Best: Q{getBestPace()}
+          &nbsp;&nbsp;Best: {getBestPace()}
         </div>
       </div>
     </div>
