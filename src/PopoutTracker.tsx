@@ -27,7 +27,7 @@ export default function PopoutTracker (): JSX.Element {
     }
 
     updater()
-    setTimeout(updater, 1000)
+    setInterval(updater, 1000)
   }, [])
 
   /**
