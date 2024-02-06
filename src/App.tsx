@@ -1,4 +1,3 @@
-import React from 'react'
 import QuotaCalculator from './QuotaCalculator'
 import OvertimeCalculator from './OvertimeCalculator'
 import CareerCalculator from './CareerCalculator'

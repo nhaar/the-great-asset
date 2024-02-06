@@ -1,18 +1,32 @@
 import { useEffect, useState } from 'react'
 import { getNewProfitQuota, isValidNumberInput } from './utils'
 
+/** All run tracker data that is stored locally. Maps arbitrary names to their run data */
+interface LocalData {
+  [name: string]: RunData
+}
+
+/** All data used to define a run */
 interface RunData {
+  /** Data of each "quota season". */
   timeData: TimeData[]
+  /** A number to correct the ship total in case needed. */
   shipCorrection: number
 }
 
+/** Data for a "quota season" */
 interface TimeData {
+  /** Data for each day in the season */
   days: DaysData[]
+  /** Current quota to meet in this "season" */
   currentQuota: number
+  /** The total scrap sold at the end */
   scrapSold: number
 }
 
+/** Information relevant to a day */
 interface DaysData {
+  /** The acquired amount of scrap */
   acquired: number
 }
 
@@ -67,6 +81,23 @@ function isRunData (obj: any): obj is RunData {
     return false
   } else if (typeof obj.shipCorrection !== 'number') {
     return false
+  }
+  return true
+}
+
+/**
+ * Checks if an object is of type `LocalData`
+ * @param obj
+ * @returns
+ */
+function isLocalData (obj: any): obj is LocalData {
+  if (obj === undefined || obj === null) {
+    return false
+  }
+  for (const key in obj) {
+    if (!isRunData(obj[key])) {
+      return false
+    }
   }
   return true
 }
@@ -164,25 +195,36 @@ function QuotaTime ({ data, quotaNumber, setterFn }: { data: TimeData, quotaNumb
   )
 }
 
-export default function CareerCalculator (): JSX.Element {
-  const [runData, setRunData] = useState<RunData>(() => {
-    const savedData: string | null = localStorage.getItem('the-great-asset')
-    const defaultData: RunData = {
-      timeData: [],
-      shipCorrection: 0
-    }
-    if (savedData === null) {
-      return defaultData
-    }
-    const localData = JSON.parse(savedData)
-    if (isRunData(localData)) {
-      return localData
-    } else {
-      return defaultData
-    }
-  })
-
+/** Component that handles tracking a specific run */
+function RunTracker ({ name, localData, setLocalData }: { name: string, localData: LocalData, setLocalData: React.Dispatch<React.SetStateAction<LocalData>> }): JSX.Element {
   const [nextQuotaDiv, setNextQuotaDiv] = useState<JSX.Element>(<div />)
+
+  /** Reference to this run's data */
+  const runData = localData[name]
+
+  /**
+   * Sets a new value for the run data by giving a new value
+   * @param newRunData
+   */
+  function setRunData (newRunData: RunData): void
+
+  /**
+   * Sets a new value for the run data by using a setter function, like normal React states.
+   * @param setter
+   */
+  function setRunData (setter: (prev: RunData) => RunData): void
+
+  function setRunData (x: RunData | ((prev: RunData) => RunData)): void {
+    if (x instanceof Function) {
+      setLocalData(prev => {
+        const r = { ...prev[name] }
+        const newRunData = x(r)
+        return { ...prev, [name]: newRunData }
+      })
+    } else {
+      setLocalData((prev: LocalData) => ({ ...prev, [name]: x }))
+    }
+  }
 
   function getShipTotal (): number {
     let total: number = 0
@@ -221,7 +263,9 @@ export default function CareerCalculator (): JSX.Element {
     addQuota(Number(newQuota))
   }
 
-  useEffect(() => {
+  /** General function that updates the next quota info and adds new quota data */
+  function updateCurrentQuota (): void {
+    const runData = localData[name]
     if (runData.timeData.length === 0) {
       addQuota(130)
     }
@@ -256,10 +300,13 @@ export default function CareerCalculator (): JSX.Element {
     }
 
     saveRunData()
-  }, [runData])
+  }
+
+  useEffect(updateCurrentQuota, [name])
+  useEffect(updateCurrentQuota, [localData])
 
   function saveRunData (): void {
-    localStorage.setItem('the-great-asset', JSON.stringify(runData))
+    localStorage.setItem('the-great-asset', JSON.stringify(localData))
   }
 
   function fixShipTotal (): void {
@@ -359,62 +406,109 @@ export default function CareerCalculator (): JSX.Element {
   }
 
   return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: '40% 1fr'
+    }}
+    >
+      <div className='is-flex is-flex-direction-column'>
+        <button
+          className='button mb-5' onClick={clickResetButton} style={{
+            width: '60%'
+          }}
+        >NEW RUN
+        </button>
+        <div>
+          {runData.timeData.map((timeData, index) => {
+            return <QuotaTime key={index} data={timeData} quotaNumber={index + 1} setterFn={setRunData} />
+          })}
+        </div>
+        {nextQuotaDiv}
+      </div>
+      <div className='is-flex is-flex-direction-column'>
+        <div className='mb-6'>
+          <div>
+            SHIP TOTAL: {getShipTotal()}
+          </div>
+          <div>
+            Ship total not right? Click the button to fix it.
+          </div>
+          <button className='button' onClick={fixShipTotal}>
+            FIX SHIP TOTAL
+          </button>
+        </div>
+        <div className='mb-6'>
+          <div>
+            Total average loot per day: {avgLootPerDay.toFixed(2)}
+          </div>
+          <div>
+            This value ignores days that haven't been done yet in the current quota.
+          </div>
+        </div>
+        <div>
+          <div>
+            At the current pace:
+          </div>
+          <FinalQuotaStat randomMessage='* In the worst possible RNG' randomValueThroughout={0.5} randomValueAtEnd={-0.5} />
+          <FinalQuotaStat randomMessage='* In the average RNG' randomValueThroughout={0} randomValueAtEnd={0} />
+          <FinalQuotaStat randomMessage='* In the best possible RNG' randomValueThroughout={-0.5} randomValueAtEnd={0.5} />
+          <div>
+            This pace will be specially inaccurate if you are in the first few quotas depending on your strats (before enough paid moon averages are accounted and before the quota exceeds the price to go to the paid moon)
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Page component, displays everything */
+export default function CareerCalculator (): JSX.Element {
+  const [localData, setLocalData] = useState<LocalData>(() => {
+    const savedData: string | null = localStorage.getItem('the-great-asset')
+    const defaultData: LocalData = {}
+    if (savedData === null) {
+      return defaultData
+    }
+    const localData = JSON.parse(savedData)
+    if (isLocalData(localData)) {
+      return localData
+    } else {
+      return defaultData
+    }
+  })
+  const [selectedRun, setSelectedRun] = useState<string>('')
+
+  /** To store all the ways to access previously created runs */
+  const tabComponents = []
+  for (const run in localData) {
+    tabComponents.push((
+      <button
+        key={run} className='button' onClick={(): void => setSelectedRun(run)}
+      >
+        {run}
+      </button>
+    ))
+  }
+
+  /**
+   * Creates a new run and adds it to the local data
+   */
+  function addNewRun (): void {
+    const runName: string | null = window.prompt('What is the name of the run?')
+    if (runName === null) {
+      return
+    }
+    setLocalData((prev: LocalData) => ({ ...prev, [runName]: { timeData: [], shipCorrection: 0 } }))
+  }
+
+  return (
     <div className='has-text-primary mx-6 mb-6'>
       <h2 className='ml-3 mb-6 has-text-centered'>
         Career Calculator
       </h2>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '40% 1fr'
-      }}
-      >
-        <div className='is-flex is-flex-direction-column'>
-          <button
-            className='button mb-5' onClick={clickResetButton} style={{
-              width: '60%'
-            }}
-          >NEW RUN
-          </button>
-          <div>
-            {runData.timeData.map((timeData, index) => {
-              return <QuotaTime key={index} data={timeData} quotaNumber={index + 1} setterFn={setRunData} />
-            })}
-          </div>
-          {nextQuotaDiv}
-        </div>
-        <div className='is-flex is-flex-direction-column'>
-          <div className='mb-6'>
-            <div>
-              SHIP TOTAL: {getShipTotal()}
-            </div>
-            <div>
-              Ship total not right? Click the button to fix it.
-            </div>
-            <button className='button' onClick={fixShipTotal}>
-              FIX SHIP TOTAL
-            </button>
-          </div>
-          <div className='mb-6'>
-            <div>
-              Total average loot per day: {avgLootPerDay.toFixed(2)}
-            </div>
-            <div>
-              This value ignores days that haven't been done yet in the current quota.
-            </div>
-          </div>
-          <div>
-            <div>
-              At the current pace:
-            </div>
-            <FinalQuotaStat randomMessage='* In the worst possible RNG' randomValueThroughout={0.5} randomValueAtEnd={-0.5} />
-            <FinalQuotaStat randomMessage='* In the average RNG' randomValueThroughout={0} randomValueAtEnd={0} />
-            <FinalQuotaStat randomMessage='* In the best possible RNG' randomValueThroughout={-0.5} randomValueAtEnd={0.5} />
-            <div>
-              This pace will be specially inaccurate if you are in the first few quotas depending on your strats (before enough paid moon averages are accounted and before the quota exceeds the price to go to the paid moon)
-            </div>
-          </div>
-        </div>
-      </div>
+      {tabComponents}
+      <button onClick={addNewRun}>New Run</button>
+      {selectedRun === '' ? <div /> : <RunTracker key={selectedRun} name={selectedRun} localData={localData} setLocalData={setLocalData} />}
     </div>
   )
 }
