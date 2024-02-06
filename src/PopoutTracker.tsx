@@ -140,7 +140,7 @@ export default function PopoutTracker (): JSX.Element {
           Ship Total: {getShipTotal()}
         </div>
         <div style={marginStyle}>
-          Avg/Day: {getAverageLootPerDay()}
+          Avg/Day: {getAverageLootPerDay().toFixed(2)}
         </div>
         <div style={marginStyle}>
           Quota Pace:
