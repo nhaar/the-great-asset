@@ -226,7 +226,7 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
     }
   }
 
-  function getShipTotal (): number {
+  function getShipTotal (bypassCorrection: boolean = false): number {
     let total: number = 0
     for (const timeData of runData.timeData) {
       for (const dayData of timeData.days) {
@@ -235,6 +235,9 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
       total -= timeData.scrapSold
     }
 
+    if (bypassCorrection) {
+      return total
+    }
     return total + runData.shipCorrection
   }
 
@@ -316,7 +319,7 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
       return
     }
     const newRunData = { ...runData }
-    newRunData.shipCorrection = Number(newTotal) - getShipTotal()
+    newRunData.shipCorrection = Number(newTotal) - getShipTotal(true)
     setRunData(newRunData)
   }
 
