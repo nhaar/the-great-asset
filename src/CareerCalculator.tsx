@@ -398,13 +398,6 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
     )
   }
 
-  function clickResetButton (): void {
-    if (window.confirm('Are you sure you want to reset?')) {
-      localStorage.removeItem('the-great-asset')
-      window.location.reload()
-    }
-  }
-
   return (
     <div style={{
       display: 'grid',
@@ -412,12 +405,6 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
     }}
     >
       <div className='is-flex is-flex-direction-column'>
-        <button
-          className='button mb-5' onClick={clickResetButton} style={{
-            width: '60%'
-          }}
-        >NEW RUN
-        </button>
         <div>
           {runData.timeData.map((timeData, index) => {
             return <QuotaTime key={index} data={timeData} quotaNumber={index + 1} setterFn={setRunData} />
@@ -501,13 +488,41 @@ export default function CareerCalculator (): JSX.Element {
     setLocalData((prev: LocalData) => ({ ...prev, [runName]: { timeData: [], shipCorrection: 0 } }))
   }
 
+  /**
+   * Deletes the selected run
+   */
+  function deleteRun (): void {
+    const confirm = window.confirm(`Are you sure you want to delete this run? "${selectedRun}"`)
+    if (confirm) {
+      const newLocalData = { ...localData }
+      /* eslint-disable @typescript-eslint/no-dynamic-delete */
+      // disabling this because would require too big of a refactoring to change the data structure and there's not any concern in deleting it here.
+      delete newLocalData[selectedRun]
+      /* eslint-disable @typescript-eslint/no-dynamic-delete */
+      setLocalData(newLocalData)
+      setSelectedRun('')
+      saveRunData(newLocalData)
+    }
+  }
+
+  /** Saves data locally */
+  function saveRunData (localData: LocalData): void {
+    localStorage.setItem('the-great-asset', JSON.stringify(localData))
+  }
+
   return (
     <div className='has-text-primary mx-6 mb-6'>
       <h2 className='ml-3 mb-6 has-text-centered'>
         Career Calculator
       </h2>
+      <div>
+        <button onClick={addNewRun}>New Run</button>
+        <button onClick={deleteRun}>Delete Run</button>
+      </div>
+      <div>
+
+      </div>
       {tabComponents}
-      <button onClick={addNewRun}>New Run</button>
       {selectedRun === '' ? <div /> : <RunTracker key={selectedRun} name={selectedRun} localData={localData} setLocalData={setLocalData} />}
     </div>
   )
