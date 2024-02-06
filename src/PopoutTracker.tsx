@@ -126,8 +126,11 @@ export default function PopoutTracker (): JSX.Element {
           <input type='number' value={lineSpacing} onChange={e => setLineSpacing(e.target.value)} />
         </div>
       </div>
+      <div className='mb-6 has-text-primary'>
+        Friendly OBS advice: Use window capture and select this tab. You can crop the window when clicking to resize while holding ALT.
+      </div>
       <div
-        className='lethal-font p-3' style={{
+        className='lethal-font p-6' style={{
           fontSize: `${fontSize}px`,
           color: fontColor,
           backgroundColor
