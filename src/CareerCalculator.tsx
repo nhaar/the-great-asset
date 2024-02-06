@@ -345,7 +345,7 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
 
   /** Open popout tracker for the current run */
   function openPopout (): void {
-    window.open(`/the-great-asset/?p=p&run=${name}`)
+    window.open(`/?p=p&run=${name}`)
   }
 
   /** Prompts user to change when to start the average loot calculation */

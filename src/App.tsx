@@ -6,7 +6,7 @@ import PopoutTracker from './PopoutTracker'
 function ResourceLink ({ page, title, desc }: { page: string, title: string, desc: string }): JSX.Element {
   return (
     <div className='box m-6 has-text-centered has-text-primary'>
-      <a href={`/the-great-asset/?p=${page}`} className='has-text-primary'>{title}</a>
+      <a href={`/?p=${page}`} className='has-text-primary'>{title}</a>
       <h2 className='m-3'>
         {desc}
       </h2>
