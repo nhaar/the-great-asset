@@ -12,6 +12,7 @@ export interface RunData {
   timeData: TimeData[]
   /** A number to correct the ship total in case needed. */
   shipCorrection: number
+  averageCalculationStart: number
 }
 
 /** Data for a "quota season" */
@@ -347,6 +348,18 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
     window.open(`/the-great-asset/?p=p&run=${name}`)
   }
 
+  /** Prompts user to change when to start the average loot calculation */
+  function changeQuotaCalculationStart (): void {
+    const newStart: string | null = window.prompt('What is the new start for the average calculation? Starting at 1, and includes the quota you are inputting.')
+    if (!isValidNumberInput(newStart)) {
+      window.alert('Invalid value')
+      return
+    }
+    setRunData((prev: RunData) => {
+      return { ...prev, averageCalculationStart: Number(newStart) }
+    })
+  }
+
   return (
     <div style={{
       display: 'grid',
@@ -375,6 +388,11 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
           <button className='button' onClick={fixShipTotal}>
             FIX SHIP TOTAL
           </button>
+        </div>
+        <div className='mb-6'>
+          <div>Want to calculate your average from a certain point? This is useful for example if you did quota 1 in a free moon, but now you want to only calculate your averages from Rend or the others.</div>
+          <div>Currently, average is being calculated from quota #{runData.averageCalculationStart} (including)</div>
+          <button onClick={changeQuotaCalculationStart} className='button'>CHANGE AVERAGE CALCULATION START</button>
         </div>
         <div className='mb-6'>
           <div>
@@ -451,7 +469,7 @@ export default function CareerCalculator (): JSX.Element {
     if (runName === null) {
       return
     }
-    setLocalData((prev: LocalData) => ({ ...prev, [runName]: { timeData: [], shipCorrection: 0 } }))
+    setLocalData((prev: LocalData) => ({ ...prev, [runName]: { timeData: [], shipCorrection: 0, averageCalculationStart: 1 } }))
   }
 
   /**
@@ -522,7 +540,19 @@ export function getRunShipTotal (runData: RunData, bypassCorrection: boolean = f
 export function getRunAverageLootPerDay (runData: RunData): number {
   let total: number = 0
   let days: number = 0
+
+  // from "1-index" to "0-index"
+  const firstQuota = runData.averageCalculationStart - 1
+
+  // used to know which quota values to exclude
+  let currentQuota = 0
+
   for (const timeData of runData.timeData) {
+    // skipping quota if too early to include in calculation
+    if (currentQuota < firstQuota) {
+      currentQuota++
+      continue
+    }
     for (const dayData of timeData.days) {
       total += dayData.acquired
       days++
