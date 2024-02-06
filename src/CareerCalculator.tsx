@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react'
 import { getNewProfitQuota, isValidNumberInput } from './utils'
 
 /** All run tracker data that is stored locally. Maps arbitrary names to their run data */
-interface LocalData {
+export interface LocalData {
   [name: string]: RunData
 }
 
 /** All data used to define a run */
-interface RunData {
+export interface RunData {
   /** Data of each "quota season". */
   timeData: TimeData[]
   /** A number to correct the ship total in case needed. */
@@ -226,21 +226,6 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
     }
   }
 
-  function getShipTotal (bypassCorrection: boolean = false): number {
-    let total: number = 0
-    for (const timeData of runData.timeData) {
-      for (const dayData of timeData.days) {
-        total += dayData.acquired
-      }
-      total -= timeData.scrapSold
-    }
-
-    if (bypassCorrection) {
-      return total
-    }
-    return total + runData.shipCorrection
-  }
-
   function addQuota (profitQuota: number): void {
     const newRunData = { ...runData }
     newRunData.timeData.push({
@@ -264,6 +249,15 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
       return
     }
     addQuota(Number(newQuota))
+  }
+
+  /**
+   * Gets the total amount of scrap in the ship
+   * @param bypassCorrection If `true`, will ignore the ship correction
+   * @returns
+   */
+  function getShipTotal (bypassCorrection: boolean = false): number {
+    return getRunShipTotal(runData, bypassCorrection)
   }
 
   /** General function that updates the next quota info and adds new quota data */
@@ -323,71 +317,18 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
     setRunData(newRunData)
   }
 
-  function getNumberOfUndoneDays (): number {
-    let days: number = 0
-    const totalQuotas = runData.timeData.length
-    if (totalQuotas === 0) {
-      return 0
-    }
-    const lastQuota = runData.timeData[totalQuotas - 1]
-
-    for (let i = 2; i >= 0; i--) {
-      if (lastQuota.days[i].acquired > 0) {
-        break
-      }
-      days++
-    }
-
-    return days
-  }
-
+  /**
+   * Gets the average loot per day
+   * @returns
+   */
   function getAverageLootPerDay (): number {
-    let total: number = 0
-    let days: number = 0
-    for (const timeData of runData.timeData) {
-      for (const dayData of timeData.days) {
-        total += dayData.acquired
-        days++
-      }
-    }
-
-    // correction to ignore days that haven't been done yet
-    days -= getNumberOfUndoneDays()
-    if (days === 0) {
-      return 0
-    }
-    return (total + runData.shipCorrection) / days
+    return getRunAverageLootPerDay(runData)
   }
 
   const avgLootPerDay = getAverageLootPerDay()
 
   function getHowManyQuotasCanBeDone (randomValueThroughout: number, randomValueAtEnd: number): { timesFulfilled: number, finalQuota: number } {
-    if (runData.timeData.length === 0) {
-      return { timesFulfilled: 0, finalQuota: 130 }
-    }
-    let previousQuota: number = 130
-    let currentQuota: number = runData.timeData[runData.timeData.length - 1].currentQuota
-    let timesFulfilled: number = runData.timeData.length - 1
-    let scrapValue = getShipTotal() + getNumberOfUndoneDays() * avgLootPerDay
-    let hadAnyIncrease: boolean = false
-    while (scrapValue >= currentQuota) {
-      hadAnyIncrease = true
-      scrapValue += 3 * avgLootPerDay
-      scrapValue -= currentQuota
-      previousQuota = currentQuota
-      currentQuota = getNewProfitQuota(randomValueThroughout, timesFulfilled, currentQuota)
-      timesFulfilled++
-    }
-
-    // if the next quota is already impossible, `hadAnyIncrease` should be false and we
-    // don't need to calculate anything
-    let finalQuota: number = 0
-    if (hadAnyIncrease) {
-      finalQuota = getNewProfitQuota(randomValueAtEnd, timesFulfilled - 1, previousQuota)
-    } else {
-      finalQuota = currentQuota
-    }
-    return { timesFulfilled, finalQuota }
+    return getHowManyQuotasCanBeDoneInRun(runData, randomValueThroughout, randomValueAtEnd)
   }
 
   function FinalQuotaStat ({ randomValueThroughout, randomValueAtEnd, randomMessage }: { randomValueThroughout: number, randomValueAtEnd: number, randomMessage: string }): JSX.Element {
@@ -399,6 +340,11 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
         </div>
       </div>
     )
+  }
+
+  /** Open popout tracker for the current run */
+  function openPopout (): void {
+    window.open(`/the-great-asset/?p=p&run=${name}`)
   }
 
   return (
@@ -416,6 +362,9 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
         {nextQuotaDiv}
       </div>
       <div className='is-flex is-flex-direction-column'>
+        <div className='mb-6'>
+          <button className='button' onClick={openPopout}>POPOUT (For placing in OBS and others)</button>
+        </div>
         <div className='mb-6'>
           <div>
             SHIP TOTAL: {getShipTotal()}
@@ -451,29 +400,38 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
   )
 }
 
+/**
+ * Gets the local data from the local storage
+ * @returns
+ */
+export function getLocalData (): LocalData {
+  const savedData: string | null = localStorage.getItem('the-great-asset')
+  const defaultData: LocalData = {}
+  if (savedData === null) {
+    return defaultData
+  }
+  const localData = JSON.parse(savedData)
+  if (isLocalData(localData)) {
+    return localData
+  } else {
+    return defaultData
+  }
+}
+
 /** Page component, displays everything */
 export default function CareerCalculator (): JSX.Element {
-  const [localData, setLocalData] = useState<LocalData>(() => {
-    const savedData: string | null = localStorage.getItem('the-great-asset')
-    const defaultData: LocalData = {}
-    if (savedData === null) {
-      return defaultData
-    }
-    const localData = JSON.parse(savedData)
-    if (isLocalData(localData)) {
-      return localData
-    } else {
-      return defaultData
-    }
-  })
+  const [localData, setLocalData] = useState<LocalData>(getLocalData)
   const [selectedRun, setSelectedRun] = useState<string>('')
 
   /** To store all the ways to access previously created runs */
   const tabComponents = [
-    <div className='mr-4 is-flex' style={{
-      alignItems: 'center',
-      justifyContent: 'center'
-    }} key={'0000'}>RUNS</div>
+    <div
+      className='mr-4 is-flex' style={{
+        alignItems: 'center',
+        justifyContent: 'center'
+      }} key='0000'
+    >RUNS
+    </div>
   ]
   for (const run in localData) {
     tabComponents.push((
@@ -533,4 +491,109 @@ export default function CareerCalculator (): JSX.Element {
       {selectedRun === '' ? <div /> : <RunTracker key={selectedRun} name={selectedRun} localData={localData} setLocalData={setLocalData} />}
     </div>
   )
+}
+
+/**
+ * Gets the total amount of scrap in the ship in a run
+ * @param runData
+ * @param bypassCorrection If `true`, will ignore the ship correction
+ * @returns
+ */
+export function getRunShipTotal (runData: RunData, bypassCorrection: boolean = false): number {
+  let total: number = 0
+  for (const timeData of runData.timeData) {
+    for (const dayData of timeData.days) {
+      total += dayData.acquired
+    }
+    total -= timeData.scrapSold
+  }
+
+  if (bypassCorrection) {
+    return total
+  }
+  return total + runData.shipCorrection
+}
+
+/**
+ * Gets the average loot per day in a run
+ * @param runData
+ * @returns
+ */
+export function getRunAverageLootPerDay (runData: RunData): number {
+  let total: number = 0
+  let days: number = 0
+  for (const timeData of runData.timeData) {
+    for (const dayData of timeData.days) {
+      total += dayData.acquired
+      days++
+    }
+  }
+
+  // correction to ignore days that haven't been done yet
+  days -= getRunNumberOfUndoneDays(runData)
+  if (days === 0) {
+    return 0
+  }
+  return (total + runData.shipCorrection) / days
+}
+
+/**
+ * Gets the number of days that haven't been done yet in a run
+ * @param runData
+ * @returns
+ */
+function getRunNumberOfUndoneDays (runData: RunData): number {
+  let days: number = 0
+  const totalQuotas = runData.timeData.length
+  if (totalQuotas === 0) {
+    return 0
+  }
+  const lastQuota = runData.timeData[totalQuotas - 1]
+
+  for (let i = 2; i >= 0; i--) {
+    if (lastQuota.days[i].acquired > 0) {
+      break
+    }
+    days++
+  }
+
+  return days
+}
+
+/**
+ * Gets how many quotas can be done in a run with the given random values
+ * @param runData
+ * @param randomValueThroughout The generated random value for each quota throughout the run
+ * @param randomValueAtEnd The generated random value for the last quota
+ * @returns
+ */
+export function getHowManyQuotasCanBeDoneInRun (runData: RunData, randomValueThroughout: number, randomValueAtEnd: number): { timesFulfilled: number, finalQuota: number } {
+  const avgLootPerDay = getRunAverageLootPerDay(runData)
+
+  if (runData.timeData.length === 0) {
+    return { timesFulfilled: 0, finalQuota: 130 }
+  }
+  let previousQuota: number = 130
+  let currentQuota: number = runData.timeData[runData.timeData.length - 1].currentQuota
+  let timesFulfilled: number = runData.timeData.length - 1
+  let scrapValue = getRunShipTotal(runData) + getRunNumberOfUndoneDays(runData) * avgLootPerDay
+  let hadAnyIncrease: boolean = false
+  while (scrapValue >= currentQuota) {
+    hadAnyIncrease = true
+    scrapValue += 3 * avgLootPerDay
+    scrapValue -= currentQuota
+    previousQuota = currentQuota
+    currentQuota = getNewProfitQuota(randomValueThroughout, timesFulfilled, currentQuota)
+    timesFulfilled++
+  }
+
+  // if the next quota is already impossible, `hadAnyIncrease` should be false and we
+  // don't need to calculate anything
+  let finalQuota: number = 0
+  if (hadAnyIncrease) {
+    finalQuota = getNewProfitQuota(randomValueAtEnd, timesFulfilled - 1, previousQuota)
+  } else {
+    finalQuota = currentQuota
+  }
+  return { timesFulfilled, finalQuota }
 }

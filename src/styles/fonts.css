@@ -1,0 +1,16 @@
+@font-face {
+  font-family: 'IBM 3270';
+  src: url('3270-Regular.eot');
+  src: url('3270-Regular.eot?#iefix') format('embedded-opentype'),
+      url('3270-Regular.woff2') format('woff2'),
+      url('3270-Regular.woff') format('woff'),
+      url('3270-Regular.ttf') format('truetype'),
+      url('3270-Regular.svg#3270-Regular') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.lethal-font {
+  font-family: 'IBM 3270', monospace;
+}

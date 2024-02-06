@@ -1,6 +1,7 @@
 import QuotaCalculator from './QuotaCalculator'
 import OvertimeCalculator from './OvertimeCalculator'
 import CareerCalculator from './CareerCalculator'
+import PopoutTracker from './PopoutTracker'
 
 function ResourceLink ({ page, title, desc }: { page: string, title: string, desc: string }): JSX.Element {
   return (
@@ -23,6 +24,8 @@ export default function App (): JSX.Element {
     return <OvertimeCalculator />
   } else if (page === 'c') {
     return <CareerCalculator />
+  } else if (page === 'p') {
+    return <PopoutTracker />
   }
 
   return (
