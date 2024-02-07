@@ -43,6 +43,9 @@ export default function App (): JSX.Element {
       <ResourceLink page='q' title='Next Profit Quota Calculator' desc='Calculate what the next profit quota may be.' />
       <ResourceLink page='o' title='Overtime Bonus Calculator' desc='Calculate how much you need to sell to get a total amount of money accounting overtime bonus.' />
       <ResourceLink page='c' title='Career Calculator' desc='A calculator to examine a run of Lethal Company and keeping track of stats, as well as a pace calculator.' />
+      <div className='footer p-3 pb-5'>
+        The Great Asset version {require('../package.json').version}. <a className='has-text-primary' href='https://github.com/nhaar/the-great-asset'>Check out the repository here.</a>
+      </div>
     </div>
   )
 }

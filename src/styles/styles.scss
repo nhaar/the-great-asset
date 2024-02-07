@@ -1,7 +1,8 @@
 @charset "utf-8";
 
 $body-background-color: #7c1a1b;
-$box-background-color: #8c301f;
+$lighter-orange: #8c301f;
+$box-background-color: $lighter-orange;
 $primary: #fd9345;
 
 $input-related-color: #fb9444;
@@ -12,5 +13,8 @@ $input-color: #000000;
 $button-background-color: $input-related-color;
 $button-border-color: $input-related-color;
 $button-color: #000000;
+
+$footer-background-color: $lighter-orange;
+$footer-color: $primary;
 
 @import "~bulma/bulma";

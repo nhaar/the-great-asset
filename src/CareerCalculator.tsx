@@ -207,12 +207,18 @@ function QuotaTime ({ data, quotaNumber, setterFn }: { data: TimeData, quotaNumb
         <div>DAY</div>
         <div>ACQUIRED LOOT</div>
         {dayComponents}
-        {acquiredValues.length < 3 && <button onClick={addDay} className='button my-1' style={{
-          gridColumn: 'span 2'
-        }}>CLICK TO ADD DAY</button>}
-        {acquiredValues.length > 0 && <button onClick={removeDay} className='button my-1' style={{
-          gridColumn: 'span 2'
-        }}>REMOVE DAY</button>}
+        {acquiredValues.length < 3 && <button
+          onClick={addDay} className='button my-1' style={{
+            gridColumn: 'span 2'
+          }}
+                                      >CLICK TO ADD DAY
+        </button>}
+        {acquiredValues.length > 0 && <button
+          onClick={removeDay} className='button my-1' style={{
+            gridColumn: 'span 2'
+          }}
+                                      >REMOVE DAY
+        </button>}
       </div>
       <div>
         <div>SCRAP SOLD</div>
@@ -548,9 +554,9 @@ export function getRunShipTotal (runData: RunData, bypassCorrection: boolean = f
     // accounting for the fact that when selling earlier, you have can't sell at 100% price
     let companyBuyingAt = 1
     switch (daysDone) {
-      case 0: companyBuyingAt = 0.33; break;
-      case 1: companyBuyingAt = 0.53; break;
-      case 2: companyBuyingAt = 0.77; break;
+      case 0: companyBuyingAt = 0.33; break
+      case 1: companyBuyingAt = 0.53; break
+      case 2: companyBuyingAt = 0.77; break
     }
     total -= timeData.scrapSold / companyBuyingAt
   }
