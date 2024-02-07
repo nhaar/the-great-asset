@@ -17,7 +17,7 @@ export interface RunData {
 
 /** Data for a "quota season" */
 interface TimeData {
-  /** Data for each day in the season */
+  /** Data for each day in the season. There should be no more than three days in here. */
   days: DaysData[]
   /** Current quota to meet in this "season" */
   currentQuota: number
@@ -154,13 +154,33 @@ function QuotaTime ({ data, quotaNumber, setterFn }: { data: TimeData, quotaNumb
 
   const dayComponents = []
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < acquiredValues.length; i++) {
     dayComponents.push((
       <div key={String(i) + '1'}>{i + 1}</div>
     ))
     dayComponents.push((
       <input className='input' key={String(i) + '2'} type='text' value={acquiredValues[i]} onChange={getUpdateAcquiredValue(i)} />
     ))
+  }
+
+  /** Adds a new day for the user to input */
+  function addDay (): void {
+    // shouldn't be possible, just in case
+    if (acquiredValues.length >= 3) {
+      return
+    }
+    setAcquiredValues([...acquiredValues, '0'])
+  }
+
+  /** Removes a day from the user's inputs */
+  function removeDay (): void {
+    // shouldnt be possible, just incase
+    if (acquiredValues.length <= 0) {
+      return
+    }
+    const newAcquiredValues = [...acquiredValues]
+    newAcquiredValues.pop()
+    setAcquiredValues(newAcquiredValues)
   }
 
   return (
@@ -187,6 +207,12 @@ function QuotaTime ({ data, quotaNumber, setterFn }: { data: TimeData, quotaNumb
         <div>DAY</div>
         <div>ACQUIRED LOOT</div>
         {dayComponents}
+        {acquiredValues.length < 3 && <button onClick={addDay} className='button my-1' style={{
+          gridColumn: 'span 2'
+        }}>CLICK TO ADD DAY</button>}
+        {acquiredValues.length > 0 && <button onClick={removeDay} className='button my-1' style={{
+          gridColumn: 'span 2'
+        }}>REMOVE DAY</button>}
       </div>
       <div>
         <div>SCRAP SOLD</div>
@@ -230,13 +256,7 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
   function addQuota (profitQuota: number): void {
     const newRunData = { ...runData }
     newRunData.timeData.push({
-      days: [{
-        acquired: 0
-      }, {
-        acquired: 0
-      }, {
-        acquired: 0
-      }],
+      days: [],
       currentQuota: profitQuota,
       scrapSold: 0
     })
@@ -380,7 +400,7 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
         </div>
         <div className='mb-6'>
           <div>
-            SHIP TOTAL: {getShipTotal()}
+            SHIP TOTAL: {getShipTotal().toFixed(0)}
           </div>
           <div>
             Ship total not right? Click the button to fix it.
@@ -520,10 +540,19 @@ export default function CareerCalculator (): JSX.Element {
 export function getRunShipTotal (runData: RunData, bypassCorrection: boolean = false): number {
   let total: number = 0
   for (const timeData of runData.timeData) {
+    let daysDone = 0
     for (const dayData of timeData.days) {
+      daysDone++
       total += dayData.acquired
     }
-    total -= timeData.scrapSold
+    // accounting for the fact that when selling earlier, you have can't sell at 100% price
+    let companyBuyingAt = 1
+    switch (daysDone) {
+      case 0: companyBuyingAt = 0.33; break;
+      case 1: companyBuyingAt = 0.53; break;
+      case 2: companyBuyingAt = 0.77; break;
+    }
+    total -= timeData.scrapSold / companyBuyingAt
   }
 
   if (bypassCorrection) {
@@ -559,8 +588,6 @@ export function getRunAverageLootPerDay (runData: RunData): number {
     }
   }
 
-  // correction to ignore days that haven't been done yet
-  days -= getRunNumberOfUndoneDays(runData)
   if (days === 0) {
     return 0
   }
@@ -568,26 +595,17 @@ export function getRunAverageLootPerDay (runData: RunData): number {
 }
 
 /**
- * Gets the number of days that haven't been done yet in a run
+ * Gets the number of days that haven't been done yet in the current quota
  * @param runData
  * @returns
  */
 function getRunNumberOfUndoneDays (runData: RunData): number {
-  let days: number = 0
   const totalQuotas = runData.timeData.length
   if (totalQuotas === 0) {
     return 0
   }
   const lastQuota = runData.timeData[totalQuotas - 1]
-
-  for (let i = 2; i >= 0; i--) {
-    if (lastQuota.days[i].acquired > 0) {
-      break
-    }
-    days++
-  }
-
-  return days
+  return lastQuota.days.length
 }
 
 /**
