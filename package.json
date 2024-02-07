@@ -1,6 +1,6 @@
 {
   "name": "the-great-asset",
-  "version": "2024.2.0",
+  "version": "2024.2.1",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",

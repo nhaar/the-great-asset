@@ -406,7 +406,7 @@ function RunTracker ({ name, localData, setLocalData }: { name: string, localDat
         </div>
         <div className='mb-6'>
           <div>
-            SHIP TOTAL: {getShipTotal().toFixed(0)}
+            SHIP TOTAL: {getShipTotal()}
           </div>
           <div>
             Ship total not right? Click the button to fix it.
@@ -561,10 +561,13 @@ export function getRunShipTotal (runData: RunData, bypassCorrection: boolean = f
     total -= timeData.scrapSold / companyBuyingAt
   }
 
-  if (bypassCorrection) {
-    return total
+  let correction = 0
+  if (!bypassCorrection) {
+    correction = runData.shipCorrection
   }
-  return total + runData.shipCorrection
+
+  // need to round in case there is early selling (not 100%, will lead to small errors inevitably unless this gets properly set up to how the game rounds it)
+  return Math.floor(total + runData.shipCorrection)
 }
 
 /**
